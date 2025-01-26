@@ -1,0 +1,30 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>heroes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">heroes</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ul class="heroes">
+    <li *ngFor="let hero of heroes">
+      <app-heroes-list [hero]="hero" (sendId)="navigate($event)"></app-heroes-list>
+      <button type="button" class="delete" title="delete hero" (click)="delete(hero)">x</button>
+    </li>
+  </ul>
+
+  <div>
+    <label for="new-hero">Hero name: </label>
+    <input id="new-hero" #heroName />
+
+    <!-- (click) passes input value to add() and then clears the input -->
+    <button type="button" class="add-button" (click)="add(heroName.value); heroName.value=''">
+      Add hero
+    </button>
+  </div>
+</ion-content>

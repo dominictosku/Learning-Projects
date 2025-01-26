@@ -1,0 +1,70 @@
+@inject CarService CarService
+<div class="mt-4 mb-4">
+<h3>Add New Car</h3>
+    <MudGrid>
+        <MudItem>
+            <MudPaper Class="pa-4">
+                <MudForm>
+                    <MudTextField T="string" @bind-Value="newCar.Name" Label="Name" Required="true" RequiredError="Name is required!" />
+
+                    <MudDatePicker @bind-Value="newCar.ReleaseDate" Label="Date" Required="true" RequiredError="Release date is required!" />
+
+                    <MudSelect @bind-Value="newCar.Producer" T="Producer" ToStringFunc="converter" Label="Producer" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var producer in producers)
+                        {
+                            <MudSelectItem Value="@(producer)" />
+                        }
+                    </MudSelect>
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddCar">Add Car</MudButton>
+                </MudForm>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</div>
+
+<h3>Car List</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Release Date</th>
+            <th>Producer</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var car in cars)
+        {
+            <tr>
+                <td>@car.Id</td>
+                <td>@car.Name</td>
+                <td>@car.ReleaseDate.ToShortDateString()</td>
+                <td>@producers.FirstOrDefault(p => p.Id == car.ProducerId)?.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private Car newCar = new Car();
+    private List<Car> cars;
+    private List<Producer> producers;
+
+    Func<Producer, string> converter = p => p?.Name;
+
+    protected override void OnInitialized()
+    {
+        producers = CarService.GetProducers();
+        cars = CarService.GetCars();
+    }
+
+    private void AddCar()
+    {
+        newCar.ProducerId = newCar.Producer?.Id ?? 0;
+        CarService.AddCar(newCar);
+        cars = CarService.GetCars();
+        newCar = new Car();
+    }
+}

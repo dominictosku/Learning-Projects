@@ -1,0 +1,81 @@
+@page "/folder"
+@using CommunityToolkit.Maui.Storage
+@using MAUIExamples.Helper
+@inject IFolderPicker folderPicker;
+<h1>Folder scan</h1>
+<div>Scan all files inside a folder and also view its content by clicking on the file. Only images and pdfs currently supported</div>
+<h3>Please choose a folder.</h3>
+<MudButton Class="mb-4" Variant="Variant.Filled" Color="Color.Primary" OnClick="async () => await PickFolder(default)">Pick folder</MudButton>
+<div>@error</div>
+@if (filesInFolder != null)
+{
+    <MudItem Class="mt-4">
+        <MudPaper Width="300px" Elevation="0">
+            <MudTreeView Hover ReadOnly="@ReadOnly" @bind-SelectedValue="SelectedValue" SelectionMode="@SelectionMode">
+                <MudTreeViewItem Value="@(currentFolder)" Icon="@Icons.Custom.Uncategorized.Folder" IconExpanded="@Icons.Custom.Uncategorized.FolderOpen">
+                    @foreach (var fileName in filesInFolder)
+                    {
+                        <MudTreeViewItem OnClick=@(() => LoadFile(fileName)) Value="@(fileName)" Icon="@Icons.Custom.FileFormats.FileImage" />
+                    }
+                </MudTreeViewItem>
+            </MudTreeView>
+        </MudPaper>
+    </MudItem>
+    @if (imgUrl != null && !loading)
+    {
+        <iframe src="@imgUrl" width="100%" height="2100px" />
+    }
+}
+@if (loading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+<hr class="mb-5" />
+
+@code {
+    private bool loading;
+    string currentFolder = string.Empty;
+    List<string>? filesInFolder;
+    string imgUrl = string.Empty;
+    string error = string.Empty;
+
+    public string SelectedValue = "tasks.json";
+    public bool ReadOnly = false;
+    public SelectionMode SelectionMode = SelectionMode.SingleSelection;
+
+    void LoadFile(string filePath)
+    {
+        error = string.Empty;
+        imgUrl = FileHelper.GetBase64URL(filePath);
+    }
+
+    async Task PickFolder(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await folderPicker.PickAsync(cancellationToken);
+            result.EnsureSuccess();
+            ReadFolder(result);
+        }
+        catch (Exception e)
+        {
+            error = "Folder could not be scanned";
+        }
+
+    }
+
+    public void ReadFolder(FolderPickerResult result)
+    {
+        if (result.Folder is null)
+            return;
+        currentFolder = result.Folder.Name;
+        var folderPath = result.Folder.Path;
+        if (Directory.Exists(folderPath))
+        {
+            // This path is a directory
+            filesInFolder = FileHelper.GetFilesFromDirectory(folderPath);
+        }
+    }
+}

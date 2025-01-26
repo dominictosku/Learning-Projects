@@ -1,0 +1,7 @@
+{
+  "name": "ionic-heroes",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

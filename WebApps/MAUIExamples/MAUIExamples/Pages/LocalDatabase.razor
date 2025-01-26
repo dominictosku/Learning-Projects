@@ -1,0 +1,93 @@
+@page "/localDatabase"
+@using CommunityToolkit.Maui.Storage
+@using MAUIExamples.Components.Cars
+@using MAUIExamples.Database
+@inject TodoItemDatabase database;
+<h1>Persist data in local database</h1>
+<div>Type in some data. The data will be saved inside a sqlLite db</div>
+
+<h3 class="mb-4">Todo List</h3>
+<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetDatabase">Reset Database</MudButton>
+
+<div class="mb-4">
+    @if (todoItems.Any())
+    {
+        <MudDataGrid Items="@todoItems">
+            <Columns>
+                <PropertyColumn Property="x => x.Title" Title="Title" />
+                <PropertyColumn Property="x => x.Description" />
+                <TemplateColumn>
+                    <CellTemplate>
+                        <MudStack Row>
+                            <input type="checkbox" @bind="@context.Item.Done" @onclick="() => ToggleTodoItem(context.Item)" />
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn>
+                    <CellTemplate>
+                        <MudStack Row>
+                            <MudButton OnClick="() => DeleteTodoItem(context.Item)">Delete </MudButton>
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    }
+</div>
+
+
+<h3>Add New Todo Item</h3>
+<MudItem>
+    <MudTextField Label="Title" @bind-Value="newTodoItem.Title" />
+</MudItem>
+<MudItem>
+    <MudTextField Label="Description" @bind-Value="newTodoItem.Description" />
+</MudItem>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddTodoItem">Add Todo</MudButton>
+
+@code {
+    private List<TodoItem> todoItems = new List<TodoItem>();
+    private TodoItem newTodoItem = new TodoItem();
+    string message = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await GetTodoItems();
+    }
+
+    private async Task GetTodoItems()
+    {
+        todoItems = await database.GetItemsAsync();
+    }
+
+    private async Task AddTodoItem()
+    {
+        await database.SaveItemAsync(newTodoItem);
+        newTodoItem = new TodoItem();
+        await GetTodoItems();
+    }
+
+    private async Task DeleteTodoItem(TodoItem item)
+    {
+        var itemToDelete = await database.GetItemAsync(item.Id);
+        if (itemToDelete == null)
+        {
+            return;
+        }
+        await database.DeleteItemAsync(item);
+        await GetTodoItems();
+    }
+
+    private async Task ToggleTodoItem(TodoItem item)
+    {
+        item.Done = !item.Done;
+        await database.SaveItemAsync(item);
+    }
+
+    private async Task ResetDatabase()
+    {
+        await database.ResetDatabase();
+        todoItems.Clear();
+    }
+}

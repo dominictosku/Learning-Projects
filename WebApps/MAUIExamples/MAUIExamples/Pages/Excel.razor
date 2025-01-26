@@ -1,0 +1,52 @@
+@page "/excel"
+@using CommunityToolkit.Maui.Storage
+@using MAUIExamples.Components.Cars
+@inject ExcelService excelService;
+@inject CarService CarService;
+@implements IDisposable;
+<h1>Create an excel from data</h1>
+<div>Write down some cars down and create an Excel file from this data</div>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateExcel">Create Excel</MudButton>
+
+<CarTable />
+<div>Progress: @currentProgress</div>
+<div>@message</div>
+
+@code {
+    private Car newCar = new Car();
+    string message = string.Empty;
+    private CancellationTokenSource? _cts;
+    double currentProgress;
+
+    async Task CreateExcel()
+    {
+        _cts = new();
+        await SaveFile(_cts.Token);
+    }
+
+    async Task SaveFile(CancellationToken cancellationToken)
+    {
+        var cars = CarService.GetCars();
+        var producers = CarService.GetProducers();
+        using var stream = excelService.GenerateExcel(cars, producers);
+        var saverProgress = new Progress<double>(percentage => currentProgress = percentage);
+        var fileSaverResult = await FileSaver.Default.SaveAsync("test.xlsx", stream, saverProgress, cancellationToken);
+        if (fileSaverResult.IsSuccessful)
+        {
+            message = "File was created";
+        }
+        else
+        {
+            message = "File could not be created";
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_cts != null)
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+        }
+    }
+}

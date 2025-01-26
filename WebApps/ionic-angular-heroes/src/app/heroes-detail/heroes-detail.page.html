@@ -1,0 +1,28 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>heroes-detail</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">heroes-detail</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <button type="button" (click)="goBack()">go back</button>
+  <div *ngIf="hero">
+
+    <h2>{{ hero.name | uppercase }} Details</h2>
+    <div>
+      <label for="name">Hero name: </label>
+      <input id="name" [(ngModel)]="hero.name" placeholder="name">
+    </div>
+    <div>
+      <label for="superPower">Hero Power: </label>
+      <input id="superPower" [(ngModel)]="hero.superPower" placeholder="superPower">
+    </div>
+    <button type="button" (click)="save()">save</button>
+  </div>
+</ion-content>

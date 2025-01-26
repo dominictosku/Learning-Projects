@@ -1,0 +1,50 @@
+@page "/file"
+@using MAUIExamples.Helper
+<h1>File viewer</h1>
+<div>Upload an image or pdf to view it here. Supported formats are png, jpg and pdf</div>
+<h3>Please choose a file.</h3>
+<InputFile @ref="inputFile" class="w-100" OnChange="async (e) => await ReadFile(e)" />
+<div>@error</div>
+@if (inputFile != null && !loading)
+{
+    <iframe src="@imgUrl" width="100%" height="2100px" />
+}
+@if (loading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+<hr class="mb-5" />
+
+
+@code {
+    private bool loading;
+    private InputFile? inputFile;
+    private string imgUrl = string.Empty;
+    string error = string.Empty;
+
+    public async Task ReadFile(InputFileChangeEventArgs e)
+    {
+        loading = true;
+        try
+        {
+            string result = FileHelper.ValidateFile(e.File);
+            if (result != string.Empty)
+            {
+                error = result;
+                return;
+            }
+            var fileInfo = await FileHelper.LoadBrowserFile(e.File);
+            imgUrl = FileHelper.GetBase64URL(fileInfo.bytes, fileInfo.imageType);
+        }
+        catch (Exception ex)
+        {
+            error = "File could not be correctly loaded, please try again.";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

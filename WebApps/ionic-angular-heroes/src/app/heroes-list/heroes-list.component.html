@@ -1,0 +1,9 @@
+<a (click)="navigateToDetails(hero.id)" >
+  <span class="badge">{{ hero.id }}</span>
+  <span class="name">
+    {{ hero.name }}
+    <span *ngIf="hero.superPower != null">
+          💥
+    </span>
+  </span>
+</a>
