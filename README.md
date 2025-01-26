@@ -1,0 +1,1 @@
+Collection of projects for learning, mostly developed in school
