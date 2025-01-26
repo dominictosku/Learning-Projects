@@ -1,0 +1,71 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Welcome to bowling!</PageTitle>
+
+<h2>Bowling Score Table</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Frame</th>
+            @for (var i = 1; i <= 10; i++)
+            {
+                <th>@i</th>
+            }
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>@BowlingService.Player.Name</td>
+            @foreach (var result in BowlingService.Player.Results)
+            {
+                <td>
+                    <div class="d-flex justify-content-center gap-3 border">
+                        <div class="">
+                            @result.GetSymbolForBowlingRoll(0)
+                        </div>
+                        |
+                        <div>
+                            @result.GetSymbolForBowlingRoll(1)
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        @result.Points
+                    </div>
+                </td>
+            }
+            <th>@BowlingService.Player.Results.Sum(r => r.Points)</th>
+        </tr>
+    </tbody>
+</table>
+<div class="h-100 d-flex align-items-center justify-content-center gap-3">
+    <button @onclick="PlayRound" class="btn btn-primary">
+        Throw 
+    </button>
+    <div>Your last roll: @LastRoll</div>
+</div>
+
+<div class="h-100 d-flex align-items-center justify-content-center gap-3 m-4">
+    <button @onclick="ResetGame" class="btn btn-danger">
+        Reset Game
+    </button>
+</div>
+
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px auto;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
